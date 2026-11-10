@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card" style="max-width: 820px; margin: 0 auto;">
+    <div class="card-header-styled">
+        <div>
+            <h1>Edit Project Blueprint</h1>
+            <p class="text-muted" style="margin: 0;">Updating your features will regenerate the 13-section plan and source code.</p>
+        </div>
+        <a href="{{ url_for('view_project', project_id=project.id) }}" class="btn btn-secondary btn-sm">Cancel</a>
+    </div>
+
+    <form method="POST" action="{{ url_for('edit_project', project_id=project.id) }}" onsubmit="showLoading()">
+        <div class="form-group">
+            <label for="name">Project Name <span class="req">*</span></label>
+            <input type="text" id="name" name="name" required minlength="3" maxlength="100"
+                   value="{{ form_data.name if form_data else project.name }}">
+        </div>
+
+        <div class="form-group">
+            <label for="description">Feature Description <span class="req">*</span></label>
+            <textarea id="description" name="description" required minlength="10" maxlength="2000">{{ form_data.description if form_data else project.description }}</textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="language">Target Programming Language <span class="req">*</span></label>
+            <select id="language" name="language" required>
+                {% set cur_lang = form_data.language if form_data else project.language %}
+                <option value="Python" {% if cur_lang == 'Python' %}selected{% endif %}>Python</option>
+                <option value="Java" {% if cur_lang == 'Java' %}selected{% endif %}>Java</option>
+                <option value="C" {% if cur_lang == 'C' %}selected{% endif %}>C</option>
+                <option value="JavaScript" {% if cur_lang == 'JavaScript' %}selected{% endif %}>JavaScript</option>
+            </select>
+        </div>
+
+        <div style="display: flex; gap: 12px; align-items: center; margin-top: 24px;">
+            <button type="submit" class="btn btn-lg">Update & Regenerate Plan</button>
+            <a href="{{ url_for('view_project', project_id=project.id) }}" class="btn btn-lg btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
+

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card auth-container" style="max-width: 620px; text-align: center; padding: 42px 36px; margin: 50px auto;">
+    <div style="width: 68px; height: 68px; background: var(--primary-tint); border-radius: 18px; display: inline-flex; align-items: center; justify-content: center; font-size: 30px; margin-bottom: 20px; border: 1px solid var(--primary-border);">
+        ⚡
+    </div>
+    <h1 style="font-size: 2.1rem; margin-bottom: 12px; color: var(--primary-dark);">Feature to Code Planner</h1>
+    <p style="font-size: 1.05rem; color: var(--text-muted); max-width: 480px; margin: 0 auto 28px;">
+        Transform your project ideas and feature requirements into complete, academic-ready software plans and multi-file modular code.
+    </p>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; text-align: left; margin-bottom: 30px;">
+        <div style="background: #fafbfe; padding: 14px; border-radius: 10px; border: 1px solid var(--border-subtle);">
+            <div style="font-weight: 700; color: var(--primary-mid); font-size: 0.92rem; margin-bottom: 4px;">📐 13-Section Plans</div>
+            <div style="font-size: 0.83rem; color: var(--text-muted);">Overview, requirements, architecture, roadmap, and test strategy.</div>
+        </div>
+        <div style="background: #fafbfe; padding: 14px; border-radius: 10px; border: 1px solid var(--border-subtle);">
+            <div style="font-weight: 700; color: var(--primary-mid); font-size: 0.92rem; margin-bottom: 4px;">🧩 Modular Code</div>
+            <div style="font-size: 0.83rem; color: var(--text-muted);">Complete models, storage, services, and CLI for 4 languages.</div>
+        </div>
+    </div>
+
+    <div style="display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;">
+        <a href="{{ url_for('signup') }}" class="btn btn-lg">Get Started Free</a>
+        <a href="{{ url_for('login') }}" class="btn btn-lg btn-secondary">Sign In to Dashboard</a>
+    </div>
+</div>
+{% endblock %}
+

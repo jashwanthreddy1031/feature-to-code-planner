@@ -1,0 +1,369 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Top Action Bar -->
+<div class="card no-print" style="margin-bottom: 20px; padding: 18px 24px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <a href="{{ url_for('history') }}" class="btn btn-secondary btn-sm">← All Projects</a>
+            <span class="badge badge-{{ project.language.lower() }}">{{ project.language }}</span>
+            <span style="font-size: 0.85rem; color: var(--text-muted);">Created: {{ project.created_at }}</span>
+        </div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <a href="{{ url_for('download_project', project_id=project.id) }}" class="btn btn-sm">
+                <span>⬇ Download Report</span>
+            </a>
+            <button onclick="window.print()" class="btn btn-sm btn-secondary">
+                <span>🖨 Print / PDF</span>
+            </button>
+            <a href="{{ url_for('edit_project', project_id=project.id) }}" class="btn btn-sm btn-secondary">
+                <span>✏ Edit</span>
+            </a>
+            <form method="POST" action="{{ url_for('delete_project', project_id=project.id) }}" style="display: inline;"
+                  onsubmit="return confirm('Are you sure you want to delete this project plan? This cannot be undone.');">
+                <button type="submit" class="btn btn-sm btn-danger">🗑 Delete</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Navigation Bar -->
+<div class="card no-print" style="padding: 12px 20px; margin-bottom: 22px; background: #fafbfe;">
+    <div style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; white-space: nowrap;">
+        <a href="#section-overview" class="badge badge-primary" style="text-decoration: none; padding: 6px 12px;">1. Overview</a>
+        <a href="#section-objectives" class="badge badge-primary" style="text-decoration: none; padding: 6px 12px;">3. Objectives</a>
+        <a href="#section-requirements" class="badge badge-primary" style="text-decoration: none; padding: 6px 12px;">5. Requirements</a>
+        <a href="#section-modules" class="badge badge-primary" style="text-decoration: none; padding: 6px 12px;">7. System Modules</a>
+        <a href="#section-tech" class="badge badge-primary" style="text-decoration: none; padding: 6px 12px;">9. Tech Stack</a>
+        <a href="#section-roadmap" class="badge badge-primary" style="text-decoration: none; padding: 6px 12px;">10. Roadmap</a>
+        <a href="#section-tree" class="badge badge-primary" style="text-decoration: none; padding: 6px 12px;">11. Folder Structure</a>
+        <a href="#section-code" class="badge badge-primary" style="text-decoration: none; padding: 6px 12px; background: var(--primary-mid); color: white;">💻 Modular Code</a>
+        <a href="#section-testing" class="badge badge-primary" style="text-decoration: none; padding: 6px 12px;">12. Testing</a>
+    </div>
+</div>
+
+<!-- 1. PROJECT TITLE & HERO -->
+<div class="card" id="section-overview" style="border-top: 4px solid var(--primary-mid);">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 14px; margin-bottom: 12px;">
+        <div>
+            <div style="font-size: 0.82rem; font-weight: 700; color: var(--primary-mid); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">
+                1. Project Specification & Architecture
+            </div>
+            <h1>{{ project.name }}</h1>
+        </div>
+        <div style="text-align: right;">
+            <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">ESTIMATED DURATION</div>
+            <div style="font-size: 1.4rem; font-weight: 800; color: var(--primary-dark);">
+                {{ plan.estimated_days }} Days <span style="font-size: 0.95rem; font-weight: 600; color: var(--text-muted);">({{ plan.estimated_weeks }} wks)</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. PROJECT OVERVIEW -->
+    <div style="margin-top: 14px;">
+        <h3 style="color: var(--text-title); font-size: 1.05rem;">2. Project Overview</h3>
+        <p style="font-size: 0.98rem; line-height: 1.7; color: var(--text-body);">
+            {{ plan.overview or plan.summary }}
+        </p>
+    </div>
+
+    <!-- 3. PROBLEM STATEMENT & 4. OBJECTIVES -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; margin-top: 20px;">
+        <div style="background: #fafbfe; padding: 18px; border-radius: 10px; border: 1px solid var(--border-subtle);">
+            <h3 style="font-size: 1rem; margin-bottom: 8px;">3. Problem Statement</h3>
+            <p style="font-size: 0.92rem; color: var(--text-body); margin: 0; line-height: 1.6;">
+                {{ plan.problem_statement }}
+            </p>
+        </div>
+
+        <div style="background: #fafbfe; padding: 18px; border-radius: 10px; border: 1px solid var(--border-subtle);" id="section-objectives">
+            <h3 style="font-size: 1rem; margin-bottom: 8px;">4. Project Objectives</h3>
+            <ul style="padding-left: 20px; font-size: 0.92rem; color: var(--text-body); line-height: 1.6;">
+                {% for obj in plan.objectives %}
+                    <li>{{ obj }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- 5. FUNCTIONAL & 6. NON-FUNCTIONAL REQUIREMENTS -->
+<div class="card" id="section-requirements">
+    <h2>5. Functional Requirements (FR)</h2>
+    <p class="text-muted">Specific capabilities and operational workflows identified for this system:</p>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; margin-top: 14px;">
+        {% for fr in plan.functional_requirements %}
+        <div style="background: #f8faff; border: 1px solid #e0e7ff; border-radius: 8px; padding: 14px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+                <span style="font-size: 0.75rem; font-weight: 800; color: var(--primary-mid); background: #eef2ff; padding: 2px 7px; border-radius: 4px;">
+                    {{ fr.id }}
+                </span>
+                <span style="font-size: 0.8rem; color: var(--success); font-weight: 700;">Verified</span>
+            </div>
+            <strong style="color: var(--text-title); font-size: 0.95rem; display: block; margin: 4px 0;">{{ fr.title }}</strong>
+            <p style="font-size: 0.88rem; color: var(--text-body); margin: 0;">{{ fr.description }}</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <h2 style="margin-top: 28px;">6. Non-Functional Requirements (NFR)</h2>
+    <div class="table-responsive" style="margin-top: 12px;">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 25%;">Quality Attribute</th>
+                    <th>Specification & Target Standard</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for nfr in plan.non_functional_requirements %}
+                <tr>
+                    <td><strong>{{ nfr.category }}</strong></td>
+                    <td>{{ nfr.requirement }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- 7. SYSTEM MODULES & 8. MODULE DESCRIPTIONS -->
+<div class="card" id="section-modules">
+    <h2>7. System Architecture & Modules</h2>
+    <p class="text-muted">High-level decomposition into cohesive, decoupled subsystem components:</p>
+
+    <div style="display: flex; gap: 8px; flex-wrap: wrap; margin: 14px 0 20px;">
+        {% for sm in plan.system_modules %}
+            <span class="badge badge-primary" style="padding: 6px 14px; font-size: 0.85rem;">{{ sm }}</span>
+        {% endfor %}
+    </div>
+
+    <h3 style="margin-top: 22px;">8. Module Descriptions & Interfaces</h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin-top: 12px;">
+        {% for md in plan.module_descriptions %}
+        <div style="border: 1.5px solid var(--border-subtle); border-radius: 10px; padding: 18px; background: white;">
+            <div style="font-size: 0.76rem; font-weight: 800; color: var(--primary-mid); text-transform: uppercase;">{{ md.role }}</div>
+            <h4 style="margin: 4px 0 8px; color: var(--text-title);">{{ md.name }}</h4>
+            <p style="font-size: 0.88rem; color: var(--text-body); margin-bottom: 12px;">{{ md.description }}</p>
+            <div style="font-size: 0.82rem; color: var(--text-muted); border-top: 1px solid #f1f5f9; padding-top: 8px;">
+                <div><strong>Inputs:</strong> {{ md.inputs }}</div>
+                <div style="margin-top: 3px;"><strong>Outputs:</strong> {{ md.outputs }}</div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- 9. TECHNOLOGY REQUIREMENTS -->
+<div class="card" id="section-tech">
+    <h2>9. Technology Stack Requirements</h2>
+    <p class="text-muted">Recommended runtime environments, frameworks, and storage drivers for this project:</p>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-top: 16px;">
+        <div style="background: #fafbfe; padding: 16px; border-radius: 10px; border: 1px solid var(--border-subtle);">
+            <div style="font-size: 0.78rem; font-weight: 800; color: var(--primary-mid); text-transform: uppercase;">Frontend / Presentation</div>
+            <div style="font-weight: 700; font-size: 0.95rem; margin-top: 4px; color: var(--text-title);">{{ plan.tech_requirements.frontend if plan.tech_requirements else plan.frontend }}</div>
+        </div>
+        <div style="background: #fafbfe; padding: 16px; border-radius: 10px; border: 1px solid var(--border-subtle);">
+            <div style="font-size: 0.78rem; font-weight: 800; color: var(--primary-mid); text-transform: uppercase;">Backend Runtime</div>
+            <div style="font-weight: 700; font-size: 0.95rem; margin-top: 4px; color: var(--text-title);">{{ plan.tech_requirements.backend if plan.tech_requirements else plan.backend }}</div>
+        </div>
+        <div style="background: #fafbfe; padding: 16px; border-radius: 10px; border: 1px solid var(--border-subtle);">
+            <div style="font-size: 0.78rem; font-weight: 800; color: var(--primary-mid); text-transform: uppercase;">Database & Storage</div>
+            <div style="font-weight: 700; font-size: 0.95rem; margin-top: 4px; color: var(--text-title);">{{ plan.tech_requirements.database if plan.tech_requirements else plan.database }}</div>
+        </div>
+        <div style="background: #fafbfe; padding: 16px; border-radius: 10px; border: 1px solid var(--border-subtle);">
+            <div style="font-size: 0.78rem; font-weight: 800; color: var(--primary-mid); text-transform: uppercase;">Tools & Environment</div>
+            <div style="font-weight: 700; font-size: 0.95rem; margin-top: 4px; color: var(--text-title);">{{ plan.tech_requirements.tools if plan.tech_requirements else 'Standard Compiler / IDE' }}</div>
+        </div>
+    </div>
+</div>
+
+<!-- 10. IMPLEMENTATION ROADMAP -->
+<div class="card" id="section-roadmap">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+        <div>
+            <h2>10. Implementation Steps & Roadmap</h2>
+            <p class="text-muted" style="margin: 0;">Step-by-step phased engineering schedule with suggested milestone durations:</p>
+        </div>
+        <span class="badge badge-primary" style="font-size: 0.85rem; padding: 6px 14px;">Total: {{ plan.estimated_days }} Days (~{{ plan.estimated_weeks }} Weeks)</span>
+    </div>
+
+    <div style="margin-top: 18px;">
+        {% for step in plan.roadmap %}
+        <div style="border-left: 3px solid var(--primary-mid); padding-left: 18px; margin-bottom: 18px; position: relative;">
+            <div style="position: absolute; left: -7px; top: 2px; width: 11px; height: 11px; background: var(--primary-mid); border-radius: 50%; border: 2px solid white;"></div>
+            <div style="display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 8px;">
+                <h4 style="color: var(--primary-dark); margin: 0; font-size: 1.05rem;">{{ step.stage }}</h4>
+                <span class="badge" style="background: #eef2ff; color: var(--primary-dark);">Suggested: {{ step.days }} day(s)</span>
+            </div>
+            <p style="font-size: 0.91rem; color: var(--text-body); margin-top: 4px; margin-bottom: 0;">{{ step.details }}</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- 11. SUGGESTED FOLDER STRUCTURE -->
+<div class="card" id="section-tree">
+    <h2>11. Suggested Project Folder Structure</h2>
+    <p class="text-muted">Standard directory layout organized for modularity and build maintenance:</p>
+    <div class="code-container">
+        <div class="code-header">
+            <span class="code-filename">📁 Directory Tree ({{ project.language }})</span>
+            <button class="btn-copy" onclick="copyCode(this, 'tree-code')">Copy Structure</button>
+        </div>
+        <pre id="tree-code">{{ plan.folder_tree }}</pre>
+    </div>
+</div>
+
+<!-- MODULAR SAMPLE CODE GENERATION SECTION -->
+<div class="card" id="section-code" style="border: 2px solid var(--primary-border); background: #ffffff;">
+    <div class="card-header-styled">
+        <div>
+            <div style="font-size: 0.8rem; font-weight: 800; color: var(--primary-mid); text-transform: uppercase; letter-spacing: 0.05em;">
+                Engineering Source Code
+            </div>
+            <h2>Modular Sample Code Generation</h2>
+            <p class="text-muted" style="margin: 0;">Complete, decoupled source code modules tailored for <strong>{{ project.language }}</strong>.</p>
+        </div>
+        <span class="badge badge-{{ project.language.lower() }}" style="font-size: 0.9rem; padding: 6px 14px;">
+            {{ project.language }} Edition
+        </span>
+    </div>
+
+    {% if plan.modules %}
+    <!-- Module Tabs Navigation -->
+    <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 12px;">
+        {% for mod in plan.modules %}
+        <button type="button" class="btn btn-sm {% if loop.first %}btn{% else %}btn-secondary{% endif %} mod-tab-btn"
+                onclick="showModule('mod-{{ loop.index0 }}', this)">
+            📄 {{ mod.filename }}
+        </button>
+        {% endfor %}
+        <button type="button" class="btn btn-sm btn-secondary mod-tab-btn" onclick="showAllModules(this)">
+            📑 View All Modules
+        </button>
+    </div>
+
+    <!-- Modules Container -->
+    <div id="modules-wrapper">
+        {% for mod in plan.modules %}
+        <div class="module-block" id="mod-{{ loop.index0 }}" style="margin-bottom: 24px; {% if not loop.first %}display: none;{% endif %}">
+            <div style="background: #fafbfe; padding: 14px 18px; border-radius: 8px; border: 1px solid var(--border-subtle); margin-bottom: 10px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                    <div>
+                        <strong style="font-size: 1.05rem; color: var(--primary-dark);">{{ mod.module_name }}</strong>
+                        <span class="badge badge-primary" style="margin-left: 8px;">{{ mod.role }}</span>
+                    </div>
+                    <code style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: var(--primary-mid); background: white; padding: 2px 8px; border-radius: 4px; border: 1px solid var(--border-subtle);">
+                        {{ mod.filename }}
+                    </code>
+                </div>
+                <p style="font-size: 0.9rem; color: var(--text-body); margin: 6px 0 0;">
+                    <strong>Purpose:</strong> {{ mod.purpose }}
+                </p>
+            </div>
+
+            <div class="code-container">
+                <div class="code-header">
+                    <span class="code-filename">
+                        <span>📄</span>
+                        <span>{{ mod.filename }}</span>
+                    </span>
+                    <button class="btn-copy" onclick="copyCode(this, 'code-block-{{ loop.index0 }}')">Copy Code</button>
+                </div>
+                <pre id="code-block-{{ loop.index0 }}">{{ mod.code }}</pre>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <!-- Fallback unified code view -->
+    <div class="code-container">
+        <div class="code-header">
+            <span class="code-filename">Starter Code ({{ project.language }})</span>
+            <button class="btn-copy" onclick="copyCode(this, 'legacy-code')">Copy Code</button>
+        </div>
+        <pre id="legacy-code">{{ plan.code }}</pre>
+    </div>
+    {% endif %}
+</div>
+
+<!-- 12. TESTING APPROACH & 13. EXPECTED OUTPUT -->
+<div class="card" id="section-testing">
+    <h2>12. Testing Approach & Verification</h2>
+    <p class="text-muted">Rigorous testing methodologies to guarantee stability and prevent regressions:</p>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; margin-top: 14px;">
+        {% for test in plan.testing_approach %}
+        <div style="background: #fafbfe; border: 1px solid var(--border-subtle); border-radius: 8px; padding: 14px;">
+            <div style="font-size: 0.76rem; font-weight: 800; color: var(--primary-mid); text-transform: uppercase;">{{ test.type }}</div>
+            <strong style="color: var(--text-title); display: block; margin: 4px 0;">{{ test.scope }}</strong>
+            <p style="font-size: 0.88rem; color: var(--text-body); margin: 0;">{{ test.description }}</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <h2 style="margin-top: 28px;">13. Expected Output & Demonstration</h2>
+    <p class="text-muted">Expected runtime deliverables and user interface interaction:</p>
+    <div style="background: #fdfefe; border-left: 4px solid var(--success); padding: 16px 20px; border-radius: 6px; box-shadow: var(--shadow-sm); margin-top: 10px;">
+        <p style="font-size: 0.95rem; color: var(--text-body); line-height: 1.7; margin: 0;">
+            {{ plan.expected_output }}
+        </p>
+    </div>
+</div>
+
+<!-- Project Actions Footer Card -->
+<div class="card no-print" style="text-align: center; padding: 28px;">
+    <h3 style="margin-bottom: 8px;">Ready to implement this project?</h3>
+    <p class="text-muted" style="max-width: 500px; margin: 0 auto 18px;">
+        Download the full documentation report or print a college-ready PDF specification.
+    </p>
+    <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+        <a href="{{ url_for('download_project', project_id=project.id) }}" class="btn btn-lg">
+            <span>⬇ Download Full Text Report</span>
+        </a>
+        <button onclick="window.print()" class="btn btn-lg btn-secondary">
+            <span>🖨 Print / Export PDF</span>
+        </button>
+        <a href="{{ url_for('history') }}" class="btn btn-lg btn-secondary">
+            <span>All Projects History</span>
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function showModule(modId, btn) {
+        const blocks = document.querySelectorAll('.module-block');
+        blocks.forEach(b => b.style.display = 'none');
+
+        const target = document.getElementById(modId);
+        if (target) target.style.display = 'block';
+
+        const btns = document.querySelectorAll('.mod-tab-btn');
+        btns.forEach(b => {
+            b.classList.remove('btn');
+            b.classList.add('btn-secondary');
+        });
+        btn.classList.remove('btn-secondary');
+        btn.classList.add('btn');
+    }
+
+    function showAllModules(btn) {
+        const blocks = document.querySelectorAll('.module-block');
+        blocks.forEach(b => b.style.display = 'block');
+
+        const btns = document.querySelectorAll('.mod-tab-btn');
+        btns.forEach(b => {
+            b.classList.remove('btn');
+            b.classList.add('btn-secondary');
+        });
+        btn.classList.remove('btn-secondary');
+        btn.classList.add('btn');
+    }
+</script>
+{% endblock %}
+

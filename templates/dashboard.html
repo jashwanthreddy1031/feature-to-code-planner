@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Welcome Hero -->
+<div class="card" style="background: linear-gradient(135deg, #ffffff 0%, #f9f8ff 100%); border-left: 5px solid var(--primary-mid);">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+        <div>
+            <h1>Welcome back, {{ name }} 👋</h1>
+            <p style="margin: 0; color: var(--text-muted); font-size: 1rem;">
+                Manage your software project architectures, generate 13-section technical plans, and view modular source code.
+            </p>
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <a href="{{ url_for('new_project') }}" class="btn">+ Create Project</a>
+            <a href="{{ url_for('history') }}" class="btn btn-secondary">Project History</a>
+        </div>
+    </div>
+</div>
+
+<!-- Stats Grid -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <p>Total Projects</p>
+        <h2>{{ total }}</h2>
+        <div class="stat-desc">Stored in persistent database</div>
+    </div>
+    <div class="stat-card" style="background: linear-gradient(135deg, #4338ca 0%, #6366f1 100%);">
+        <p>Languages Supported</p>
+        <h2>4</h2>
+        <div class="stat-desc">Python, Java, C, JavaScript</div>
+    </div>
+    <div class="stat-card" style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);">
+        <p>Architecture Engine</p>
+        <h2 style="font-size: 1.6rem; margin-top: 10px;">Modular 2.0</h2>
+        <div class="stat-desc">13-section academic spec</div>
+    </div>
+</div>
+
+<!-- Quick Action & Recent Projects -->
+<div class="card">
+    <div class="card-header-styled">
+        <div>
+            <h2>Recent Projects</h2>
+            <p class="text-muted" style="margin: 0; font-size: 0.88rem;">Latest architectural blueprints generated for your account</p>
+        </div>
+        <a href="{{ url_for('new_project') }}" class="btn btn-sm">+ New Blueprint</a>
+    </div>
+
+    {% if recent %}
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th>Project Name</th>
+                    <th>Target Language</th>
+                    <th>Created On</th>
+                    <th style="text-align: right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in recent %}
+                <tr>
+                    <td>
+                        <strong style="color: var(--text-title); font-size: 0.95rem;">{{ p.name }}</strong>
+                    </td>
+                    <td>
+                        <span class="badge badge-{{ p.language.lower() }}">{{ p.language }}</span>
+                    </td>
+                    <td style="color: var(--text-muted); font-size: 0.86rem;">
+                        {{ p.created_at }}
+                    </td>
+                    <td style="text-align: right;">
+                        <a href="{{ url_for('view_project', project_id=p.id) }}" class="btn btn-sm">View Plan</a>
+                        <a href="{{ url_for('download_project', project_id=p.id) }}" class="btn btn-sm btn-secondary" title="Download Report">Download</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div style="text-align: center; padding: 36px 16px;">
+        <div style="font-size: 38px; margin-bottom: 10px;">🚀</div>
+        <h3 style="margin-bottom: 6px;">No projects created yet</h3>
+        <p class="text-muted" style="max-width: 400px; margin: 0 auto 18px;">
+            Enter your project idea and requirements to generate your first technical specification and modular code.
+        </p>
+        <a href="{{ url_for('new_project') }}" class="btn">+ Create Your First Project</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+

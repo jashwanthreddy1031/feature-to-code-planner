@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="card">
+        <div class="auth-header">
+            <h2>Create Account</h2>
+            <p>Start planning and generating modular software architectures.</p>
+        </div>
+
+        <form method="POST" action="{{ url_for('signup') }}">
+            <div class="form-group">
+                <label for="name">Full Name <span class="req">*</span></label>
+                <input type="text" id="name" name="name" value="{{ name or '' }}" required autofocus placeholder="e.g. Alex Morgan">
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email Address <span class="req">*</span></label>
+                <input type="email" id="email" name="email" value="{{ email or '' }}" required placeholder="name@example.com">
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password <span class="req">*</span></label>
+                <input type="password" id="password" name="password" minlength="6" required placeholder="Minimum 6 characters">
+                <div class="form-hint">Must contain at least 6 characters.</div>
+            </div>
+
+            <button type="submit" style="width: 100%; margin-top: 10px;">Create Account</button>
+        </form>
+
+        <p style="text-align: center; margin-top: 22px; font-size: 0.88rem; color: var(--text-muted);">
+            Already have an account? <a href="{{ url_for('login') }}" style="color: var(--primary-mid); font-weight: 700; text-decoration: none;">Sign in here</a>
+        </p>
+    </div>
+</div>
+{% endblock %}
+

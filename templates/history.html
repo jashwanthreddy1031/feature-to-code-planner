@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header-styled">
+        <div>
+            <h1>Project History & Saved Blueprints</h1>
+            <p class="text-muted" style="margin: 0;">Access, view, download, or manage all your generated software architectures.</p>
+        </div>
+        <a href="{{ url_for('new_project') }}" class="btn">+ Create New Project</a>
+    </div>
+
+    <!-- Search & Filter Controls -->
+    <div style="display: flex; gap: 12px; margin-bottom: 22px; flex-wrap: wrap; align-items: center; justify-content: space-between;">
+        <div style="flex: 1; min-width: 260px; max-width: 440px; position: relative;">
+            <input type="text" id="project-search" placeholder="🔍 Search projects by name..."
+                   onkeyup="filterProjects()" style="padding-left: 14px; background: white;">
+        </div>
+
+        <!-- Language Filter Badges -->
+        <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+            <button type="button" class="btn btn-sm lang-filter-btn" onclick="filterByLanguage('ALL', this)">All ({{ projects|length }})</button>
+            <button type="button" class="btn btn-sm btn-secondary lang-filter-btn" onclick="filterByLanguage('Python', this)">Python</button>
+            <button type="button" class="btn btn-sm btn-secondary lang-filter-btn" onclick="filterByLanguage('Java', this)">Java</button>
+            <button type="button" class="btn btn-sm btn-secondary lang-filter-btn" onclick="filterByLanguage('C', this)">C</button>
+            <button type="button" class="btn btn-sm btn-secondary lang-filter-btn" onclick="filterByLanguage('JavaScript', this)">JavaScript</button>
+        </div>
+    </div>
+
+    {% if projects %}
+    <div class="table-responsive">
+        <table id="history-table">
+            <thead>
+                <tr>
+                    <th>Project Name</th>
+                    <th>Language</th>
+                    <th>Created Date</th>
+                    <th style="text-align: right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in projects %}
+                <tr class="project-row" data-name="{{ p.name.lower() }}" data-lang="{{ p.language }}">
+                    <td>
+                        <div style="font-weight: 700; color: var(--primary-dark); font-size: 0.98rem;">
+                            {{ p.name }}
+                        </div>
+                        <div style="font-size: 0.82rem; color: var(--text-muted); margin-top: 2px;">
+                            {{ p.description[:80] }}{% if p.description|length > 80 %}...{% endif %}
+                        </div>
+                    </td>
+                    <td>
+                        <span class="badge badge-{{ p.language.lower() }}">{{ p.language }}</span>
+                    </td>
+                    <td style="color: var(--text-muted); font-size: 0.86rem; white-space: nowrap;">
+                        {{ p.created_at }}
+                    </td>
+                    <td style="text-align: right; white-space: nowrap;">
+                        <a href="{{ url_for('view_project', project_id=p.id) }}" class="btn btn-sm">View Plan</a>
+                        <a href="{{ url_for('download_project', project_id=p.id) }}" class="btn btn-sm btn-secondary" title="Download Text Report">Download</a>
+                        <a href="{{ url_for('edit_project', project_id=p.id) }}" class="btn btn-sm btn-secondary">Edit</a>
+                        <form method="POST" action="{{ url_for('delete_project', project_id=p.id) }}" style="display: inline;"
+                              onsubmit="return confirm('Are you sure you want to permanently delete \'{{ p.name }}\'?');">
+                            <button type="submit" class="btn btn-sm btn-danger" title="Delete Plan">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- No Search Matches Notice -->
+    <div id="no-search-match" style="display: none; text-align: center; padding: 40px 16px;">
+        <div style="font-size: 32px; margin-bottom: 8px;">🔍</div>
+        <h3 style="margin-bottom: 4px;">No matching projects found</h3>
+        <p class="text-muted">Try adjusting your search keyword or selecting a different language filter.</p>
+    </div>
+
+    {% else %}
+    <!-- Empty State -->
+    <div style="text-align: center; padding: 50px 20px;">
+        <div style="font-size: 42px; margin-bottom: 12px;">📁</div>
+        <h2 style="margin-bottom: 6px;">No projects saved yet</h2>
+        <p class="text-muted" style="max-width: 440px; margin: 0 auto 20px;">
+            You have not generated any project architectures yet. Create your first project plan to get started.
+        </p>
+        <a href="{{ url_for('new_project') }}" class="btn btn-lg">+ Create Your First Project</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let activeLanguage = 'ALL';
+
+    function filterProjects() {
+        const query = document.getElementById('project-search').value.toLowerCase().trim();
+        const rows = document.querySelectorAll('.project-row');
+        let visibleCount = 0;
+
+        rows.forEach(row => {
+            const name = row.getAttribute('data-name');
+            const lang = row.getAttribute('data-lang');
+            
+            const matchName = !query || name.includes(query);
+            const matchLang = activeLanguage === 'ALL' || lang === activeLanguage;
+
+            if (matchName && matchLang) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        const noMatch = document.getElementById('no-search-match');
+        const table = document.getElementById('history-table');
+        if (noMatch && table) {
+            if (visibleCount === 0 && rows.length > 0) {
+                noMatch.style.display = 'block';
+                table.style.display = 'none';
+            } else {
+                noMatch.style.display = 'none';
+                table.style.display = '';
+            }
+        }
+    }
+
+    function filterByLanguage(lang, btn) {
+        activeLanguage = lang;
+        const btns = document.querySelectorAll('.lang-filter-btn');
+        btns.forEach(b => {
+            b.classList.remove('btn');
+            b.classList.add('btn-secondary');
+        });
+        btn.classList.remove('btn-secondary');
+        btn.classList.add('btn');
+        filterProjects();
+    }
+</script>
+{% endblock %}
+
