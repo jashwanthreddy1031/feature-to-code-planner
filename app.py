@@ -29,15 +29,19 @@ SUPPORTED_LANGUAGES = ["Python", "Java", "C", "JavaScript"]
 
 # ---------------- DATABASE HELPERS ----------------
 
+_db_initialized = False
+
+
 def get_db():
     """Returns a connection to the SQLite database with row factory enabled."""
-    db = sqlite3.connect(DATABASE)
+    db = sqlite3.connect(DATABASE, timeout=10)
     db.row_factory = sqlite3.Row
     return db
 
 
 def init_db():
     """Initializes database tables if they do not already exist."""
+    global _db_initialized
     db = get_db()
     db.execute("""
         CREATE TABLE IF NOT EXISTS users (
@@ -61,6 +65,22 @@ def init_db():
     """)
     db.commit()
     db.close()
+    _db_initialized = True
+
+
+# Initialize database when application starts (works for Gunicorn, uWSGI, and Flask dev server).
+try:
+    init_db()
+except Exception as e:
+    app.logger.error(f"Error during startup database initialization: {e}")
+
+
+@app.before_request
+def ensure_db_initialized():
+    """Guarantees database tables exist before any incoming request is processed."""
+    global _db_initialized
+    if not _db_initialized:
+        init_db()
 
 
 # ---------------- AUTHENTICATION DECORATOR ----------------
